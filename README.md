@@ -1,6 +1,6 @@
-# Ripple Basic Template
+# Ripple TicTacToe
 
-A minimal Ripple application template with TypeScript and Vite.
+Simple TicTacToe with minimax and singleplayer
 
 ## Getting Started
 
