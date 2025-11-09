@@ -1,6 +1,6 @@
 # Ripple TicTacToe
 
-Simple TicTacToe with minimax and singleplayer
+Simple TicTacToe with minimax and singleplayer using [RippleTS](https://www.ripplejs.com/)
 
 ## Getting Started
 
