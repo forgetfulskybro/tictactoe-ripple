@@ -3,7 +3,7 @@ import { track } from 'ripple';
 export component App() {
 	let board = track(#['', '', '', '', '', '', '', '', '']);
 	let currentPlayer = track('X');
-	let gameMode = track('ai');
+	let gameMode = track('easy-ai');
 	let gameActive = track(true);
 	let statusMessage = track(`X's turn`);
 	let winningPattern = track(null);
@@ -69,19 +69,34 @@ export component App() {
 	};
 	
 	let aiMove = () => {
-		let bestScore = -Infinity;
 		let bestMove = -1;
-		for (let i = 0; i < 9; i++) {
-			if (@board[i] === '') {
-				let tempBoard = [...@board];
-				tempBoard[i] = 'O';
-				let score = minimax(tempBoard, 0, false);
-				if (score > bestScore) {
-					bestScore = score;
-					bestMove = i;
+		
+		if (@gameMode === 'easy-ai') {
+			let availableMoves = [];
+			for (let i = 0; i < 9; i++) {
+				if (@board[i] === '') {
+					availableMoves.push(i);
+				}
+			}
+			if (availableMoves.length > 0) {
+				bestMove = availableMoves[Math.floor(Math.random() * availableMoves.length)];
+			}
+		} 
+		else if (@gameMode === 'hard-ai') {
+			let bestScore = -Infinity;
+			for (let i = 0; i < 9; i++) {
+				if (@board[i] === '') {
+					let tempBoard = [...@board];
+					tempBoard[i] = 'O';
+					let score = minimax(tempBoard, 0, false);
+					if (score > bestScore) {
+						bestScore = score;
+						bestMove = i;
+					}
 				}
 			}
 		}
+		
 		if (bestMove !== -1) {
 			@board[bestMove] = 'O';
 		}
@@ -97,7 +112,7 @@ export component App() {
 	let placeMark = (index) => {
 		if (@board[index] !== '' || !@gameActive) return;
 		
-		if (@gameMode === 'ai' && @currentPlayer !== 'X') return;
+		if ((@gameMode === 'easy-ai' || @gameMode === 'hard-ai') && @currentPlayer !== 'X') return;
 		
 		@board[index] = @currentPlayer;
 		const result = checkWinner(@board);
@@ -109,7 +124,7 @@ export component App() {
 		@currentPlayer = @currentPlayer === 'X' ? 'O' : 'X';
 		updateStatus(null);
 		
-		if (@gameMode === 'ai' && @currentPlayer === 'O') {
+		if ((@gameMode === 'easy-ai' || @gameMode === 'hard-ai') && @currentPlayer === 'O') {
 			setTimeout(aiMove, 500);
 		}
 	};
@@ -130,8 +145,12 @@ export component App() {
 	<div class="container">
 		<h1>{'Tic Tac Toe'}</h1>
 		<div class="mode-selector">
-			<button class={`mode-btn ${@gameMode === 'ai' ? 'active' : ''}`} onClick={() => changeMode('ai')}>{'vs AI'}</button>
-			<button class={`mode-btn ${@gameMode === 'yourself' ? 'active' : ''}`} onClick={() => changeMode('yourself')}>{'vs Yourself'}</button>
+			<select id="game-mode" class="mode-dropdown" onChange={(e) => changeMode((e.target as HTMLSelectElement).value)} value={@gameMode}>
+				<option value="easy-ai">{'vs Easy AI'}</option>
+				<option value="hard-ai">{'vs Hard AI'}</option>
+				<option value="yourself">{'vs Yourself'}</option>
+			</select>
+			<button id="resetButton" class="reset-button" onClick={() => reset()}>{'Reset Game'}</button>
 		</div>
 		<p>{@statusMessage}</p>
 
@@ -173,6 +192,30 @@ export component App() {
 		.mode-selector label {
 			color: #e1dfdfff;
 			font-size: 1.1em;
+			margin-right: 10px;
+		}
+
+		.mode-dropdown {
+			background-color: #555;
+			border: 1px solid #777;
+			color: #e1dfdfff;
+			padding: 8px 12px;
+			margin: 0 5px;
+			cursor: pointer;
+			border-radius: 4px;
+			font-size: 1em;
+		}
+
+		.mode-dropdown:hover,
+		.mode-dropdown:focus {
+			background-color: #4CAF50;
+			border-color: #45a049;
+			outline: none;
+		}
+
+		.mode-dropdown option {
+			background-color: #555;
+			color: #e1dfdfff;
 		}
 
 		.mode-btn {
@@ -280,5 +323,20 @@ export component App() {
     		height: 200px;
     		opacity: 0;
   		}
+
+		.reset-button {
+			background-color: #d9534f;
+			border: none;
+			color: white;
+			padding: 10px 20px;
+			margin-left: 10px;
+			cursor: pointer;
+			border-radius: 4px;
+			font-size: 1em;
+		}
+
+		.reset-button:hover {
+			background-color: #c9302c;
+		}
 	</style>
 }
